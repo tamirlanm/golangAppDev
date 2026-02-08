@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const ValidAPIKey = "secret123"
+const ValidAPIKey = "secret12345"
 
 func APIKeyAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +13,7 @@ func APIKeyAuth(next http.Handler) http.Handler {
 
 		if apiKey != ValidAPIKey {
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteStatus(http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{
 				"error": "unauthorized",
 			})

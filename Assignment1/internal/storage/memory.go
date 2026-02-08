@@ -1,29 +1,29 @@
 package storage
 
 import (
-	"Assignment1/internal/handlers"
+	"Assignment1/internal/models"
 	"errors"
 	"sync"
 )
 
 type TaskStorage struct {
-	tasks  map[int]handlers.Task
+	tasks  map[int]models.Task
 	nextID int
 	mu     sync.RWMutex
 }
 
 func NewTaskStorage() *TaskStorage {
 	return &TaskStorage{
-		tasks:  make(map[int]handlers.Task),
+		tasks:  make(map[int]models.Task),
 		nextID: 1,
 	}
 }
 
-func (s *TaskStorage) Create(title string) handlers.Task {
+func (s *TaskStorage) Create(title string) models.Task {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	task := handlers.Task{
+	task := models.Task{
 		ID:    s.nextID,
 		Title: title,
 		Done:  false,
@@ -34,11 +34,11 @@ func (s *TaskStorage) Create(title string) handlers.Task {
 	return task
 }
 
-func (s *TaskStorage) GetAll() []handlers.Task {
+func (s *TaskStorage) GetAll() []models.Task {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	res := make([]handlers.Task, 0, len(s.tasks))
+	res := make([]models.Task, 0, len(s.tasks))
 
 	for _, task := range s.tasks {
 		res = append(res, task)
@@ -46,12 +46,12 @@ func (s *TaskStorage) GetAll() []handlers.Task {
 	return res
 }
 
-func (s *TaskStorage) GetByID(id int) (handlers.Task, error) {
+func (s *TaskStorage) GetByID(id int) (models.Task, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	task, exists := s.tasks[id]
 	if !exists {
-		return handlers.Task{}, errors.New("task not found")
+		return models.Task{}, errors.New("task not found")
 	}
 	return task, nil
 }
