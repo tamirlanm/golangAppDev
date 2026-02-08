@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Assignment1/internal/models"
 	"Assignment1/internal/storage"
 	"encoding/json"
 	"net/http"
@@ -41,7 +42,20 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(task)
 		return
 	}
+
 	tasks := h.storage.GetAll()
+	doneStr := r.URL.Query().Get("done")
+	if doneStr != "" {
+		doneValue := doneStr == "true"
+
+		filtered := make([]models.Task, 0)
+		for _, task := range tasks {
+			if task.Done == doneValue {
+				filtered = append(filtered, task)
+			}
+		}
+		tasks = filtered
+	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tasks)
 }
@@ -67,6 +81,14 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	if len(req.Title) > 150 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "title too long (150 characters max)",
+		})
+		return
+	}
+
 	task := h.storage.Create(req.Title)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(task)
