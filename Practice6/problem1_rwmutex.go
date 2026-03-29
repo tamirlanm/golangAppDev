@@ -11,9 +11,11 @@ func main() {
 	var wg sync.WaitGroup
 
 	for i := 0; i < 100; i++ {
-		wg.Add(i)
+		wg.Add(1)
 
 		go func(key int) {
+			defer wg.Done()
+
 			mu.Lock()
 			safeMap["key"] = key
 			mu.Unlock()
@@ -22,8 +24,9 @@ func main() {
 
 	wg.Wait()
 
-	mu.Unlock()
+	mu.RLock()
 	value := safeMap["key"]
 	mu.RUnlock()
+
 	fmt.Printf("Value: %d\n", value)
 }
